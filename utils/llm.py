@@ -2,7 +2,7 @@
 Quadropic OSS
 https://oss.quadropic.com
 Author: Mohamed Kamran
-Date: Feb 8th 2025
+Date: Feb 18th 2025
 
 This file contains the implementation of the LLM model using langchain-openai.
 """
