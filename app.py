@@ -24,6 +24,19 @@ ENV_KEYS = {
     "FIRECRAWL_API_KEY": ""
 }
 
+
+# Set Title and Description
+st.set_page_config(
+    page_title="RelearnWeb",
+    page_icon="🧠",
+    layout="centered",
+    menu_items={
+        "About": """This is a research and learning tool for the web.
+        A Joint Effort by Quadropic OSS and Open Source Contributers.""",
+        "Get Help": "mailto:oss@quadropic.com",
+    }
+    )
+
 @dataclass
 class AppState:
     research_in_progress: bool = False
