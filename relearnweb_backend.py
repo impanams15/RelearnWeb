@@ -1,3 +1,12 @@
+"""
+Quadropic OSS
+https://oss.quadropic.com
+Author: Mohamed Kamran
+Date: Feb 19th 2025
+
+This file contains the implementation of the Firecrawl search functionality.
+"""
+
 from typing import TypedDict
 from langgraph.graph import StateGraph, START, END
 from utils.llm import generate_llm_response
@@ -24,13 +33,13 @@ def input_node(state: ResearchAgentState) -> ResearchAgentState:
 
 # Node: Deep Research - perform initial research using the query.
 def learner_node(state: ResearchAgentState) -> ResearchAgentState:
-    prompt = (
-        f"You are a research assistant. We have a query: '{state['query']}'.\n"
-        f"Depth: {state['depth']}, Breadth: {state['breadth']}.\n"
-        "Generate an outline of subtopics or steps to research deeply."
+    prompt = "".join((
+        f"You are a research assistant. We have a query: '{state['query']}'.\n",
+        f"Depth: {state['depth']}, Breadth: {state['breadth']}.\n",
+        "Generate an outline of subtopics or steps to research deeply.",
         "First talk about the goal of the research that this query is meant to accomplish, then go deeper into how to advance the research once the results are found, mention additional research directions. Be as specific as possible, especially for additional research directions.",
         f"Previous Learnings and Directions:\n{state['learnings']}\n{state['directions']}"
-    )
+    ))
     response = generate_llm_response(system_prompt=prompt, user_prompt = prompt, streaming=False)
     outline = response
     state["results"] = f"Initial Outline:\n{outline}"
@@ -46,13 +55,9 @@ def serp_queries(state: ResearchAgentState) -> ResearchAgentState:
 
 # Node: Process Results - summarize the collected research.
 def process_results(state: ResearchAgentState) -> ResearchAgentState:
-    search_results = crawl_firechain(state["queries"])
+    search_results = crawl_firechain(state["query"])
     state["results"] = search_results
-    prompt = (
-        "Summarize the following research findings in bullet points. "
-        "Highlight key learnings and potential directions.\n\n"
-        f"{state['results']}"
-    )
+    prompt = "".join(("Summarize the following research findings in bullet points. ", "Highlight key learnings and potential directions.\n\n", f"{state['results']}"))
     summary = generate_llm_response(system_prompt=prompt, user_prompt=prompt)
     state["learnings"] = summary
     return state
@@ -60,8 +65,7 @@ def process_results(state: ResearchAgentState) -> ResearchAgentState:
 # Node: Compile Results - generate potential directions based on the learnings.
 def compile_results(state: ResearchAgentState) -> ResearchAgentState:
     prompt = (
-        f"Based on these learnings:\n{state['learnings']}\n"
-        "List 3 next directions or deeper questions to explore."
+        f"Based on these learnings:\n{state['learnings']}\nList 3 next directions or deeper questions to explore."
     )
     response = generate_llm_response(system_prompt=prompt, user_prompt=prompt)
     state["directions"] = response
@@ -81,18 +85,13 @@ def next_direction(state: ResearchAgentState) -> ResearchAgentState:
 
 # Node: Markdown Report - compile the final report.
 def markdown_report(state: ResearchAgentState) -> ResearchAgentState:
-    md_report = (
-        f"-Final Report\n\n"
-        f"- Query\n{state['query']}\n\n"
-        f"- Key Learnings\n{state['learnings']}\n\n"
-    )
-    report_prompt = (
-        "Generate a markdown report based on the research findings. "
-        "Include the query, key learnings, and potential solutions you have found."
-        f"{md_report}"
-    )
+    md_report = ''.join(('-Final Report\n\n', f"- Query\n{state['query']}\n\n", f"- Key Learnings\n{state['learnings']}\n\n"))
+    report_prompt = ''.join(("Generate a markdown report based on the research findings. ", "Include the query, key learnings, and potential solutions you have found.", f"{md_report}"))
     md_report_llm = generate_llm_response(system_prompt=report_prompt, user_prompt=report_prompt)
     state["report"] = md_report_llm
+    # Create A New Report in outputs/{:task}.md
+    with open(f"outputs/{state['query'].replace(' ', '_')}.md", "w") as f:
+        f.write(md_report_llm)
     return state
 
 # -------------------------------
@@ -135,9 +134,10 @@ graph.add_edge("next_direction", "learner_node")
 graph.add_edge("markdown_report", END)
 
 # ---------------------------------
-# Execute the graph with an initial state.
+# Test Query for Backend : Execute the graph with an initial state.
 # ---------------------------------
-initial_state: ResearchAgentState = {
+if __name__ == "__main__":
+    initial_state: ResearchAgentState = {
     "depth": 1,  # For example, perform one round of refinement.
     "breadth": 3,
     "query": "Quantum Computing breakthroughs",
@@ -145,11 +145,9 @@ initial_state: ResearchAgentState = {
     "directions": "",
     "learnings": "",
     "report": ""
-}
-
-final_state = graph.compile()
-
-for event in final_state.stream(initial_state):
-    for value in event.values():
-        print(value)
-        print("-" * 10)
+    }
+    final_state = graph.compile()
+    for event in final_state.stream(initial_state):
+        for value in event.values():
+            print(value)
+            print("-" * 10)
