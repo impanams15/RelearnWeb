@@ -24,6 +24,8 @@ RelearnWeb aims to empower researchers, students, and lifelong learners by provi
 
 To get started with RelearnWeb, please visit our [GitHub repository](https://github.com/QuadropicHQ/RelearnWeb) for installation instructions, documentation, and examples. We encourage you to join our community forum to ask questions, share your experiences, and contribute to the project.
 
+For Setup Guide please visit [SETUP.md](SETUP.md)
+
 ## Contributing
 We welcome contributions! Please see our [contribution guidelines](CONTRIBUTING.md) for details.
 
