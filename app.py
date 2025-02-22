@@ -193,6 +193,8 @@ def run_research(params: Dict[str, Any]):
         mime="text/markdown"
     )
 
+    print("Research and Export completed successfully!")
+
 def main():
     init_session_state()
     st.markdown(get_theme_css(), unsafe_allow_html=True)
@@ -221,17 +223,10 @@ def main():
     # Export and Clear options if research is completed.
     if st.session_state.state.research_completed and "research_report" in st.session_state:
         col1, col2 = st.sidebar.columns(2)
-        if col1.button("📥 Export Research"):
-            st.download_button(
-                label="Download Report",
-                data=st.session_state["research_report"],
-                file_name="research_report.md",
-                mime="text/markdown"
-            )
         if col2.button("🗑️ Clear Research"):
             st.session_state.state.research_completed = False
             if "research_report" in st.session_state:
-                del st.session_state["research_report"]
+                pass
             st.rerun()
     
     # Render settings if requested.
