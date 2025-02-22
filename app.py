@@ -76,6 +76,8 @@ st.markdown("""
 class AppState:
     research_in_progress: bool = False
     show_settings: bool = False
+    stop_requested: bool = False
+    research_completed: bool = False  # Added for clear functionality
 
 def init_session_state():
     """Initialize session state variables"""
@@ -153,6 +155,10 @@ def run_research(params: Dict[str, Any]):
     prev_state = {"query": "", "directions": "", "learnings": "", "report": ""}
     
     for event_counter, event in enumerate(graph.compile().stream(initial_state), 1):
+        if st.session_state.state.stop_requested:
+            st.warning("Research Stopped by User")
+            return
+            
         progress = min(int(event_counter / total_steps * 100), 100)
         progress_bar.progress(progress)
         progress_text.text(f"Task {event_counter} of {total_steps} completed.")
@@ -163,29 +169,44 @@ def run_research(params: Dict[str, Any]):
                 tab.markdown(f"**{key.title()}:**\n\n{event_data[key]}")
                 prev_state[key] = event_data[key]
         
-        time.sleep(0.1)  # Reduced delay for better performance
+        time.sleep(0.1)
 
 def main():
     init_session_state()
     render_header()
     params = render_sidebar()
     
-    col1, col2 = st.sidebar.columns(2)
+    # Modified column layout for buttons
+    col1, col2, col3 = st.sidebar.columns(3)
+    
     with col1:
         if not st.session_state.state.research_in_progress:
             if st.button("⚙️ Configure AI Settings"):
                 st.session_state.state.show_settings = True
     
     with col2:
-        if st.button("🚀 Start Research", disabled=st.session_state.state.research_in_progress):
-            st.session_state.state.research_in_progress = True
-            st.session_state.state.show_settings = False
+        if st.session_state.state.research_completed:
+            if st.button("🔄 Clear"):
+                st.session_state.state.research_completed = False
+                st.session_state.state.research_in_progress = False
+                st.experimental_rerun()
+        else:
+            if st.button("🚀 Start", disabled=st.session_state.state.research_in_progress):
+                st.session_state.state.research_in_progress = True
+                st.session_state.state.show_settings = False
+    
+    with col3:
+        if st.session_state.state.research_in_progress:
+            if st.button("🛑 Stop"):
+                st.session_state.state.stop_requested = True
+                st.session_state.state.research_in_progress = False
     
     if st.session_state.state.show_settings and not st.session_state.state.research_in_progress:
         render_settings()
     
     if st.session_state.state.research_in_progress:
         run_research(params)
+        st.session_state.state.research_completed = True
         st.session_state.state.research_in_progress = False
 
 if __name__ == "__main__":
