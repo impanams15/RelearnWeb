@@ -1,10 +1,9 @@
 """
 Quadropic OSS
 https://oss.quadropic.com
-Author: [MohamedKamran , hemanthcs34, impanams15]
+Author: [MohamedKamran, hemanthcs34, impanams15]
 Date: Feb 22nd 2025
 """
-
 
 import streamlit as st
 import time
@@ -22,86 +21,92 @@ ENV_KEYS = {
     "FIRECRAWL_API_KEY": ""
 }
 
-
-# Set Title and Description
+# Set Page Config
 st.set_page_config(
     page_title="RelearnWeb",
     page_icon="🧠",
     layout="centered",
     menu_items={
         "About": """This is a research and learning tool for the web.
-        A Joint Effort by Quadropic OSS and Open Source Contributers.""",
+A Joint Effort by Quadropic OSS and Open Source Contributers.""",
         "Get Help": "mailto:oss@quadropic.com",
     }
 )
 
-# Added custom CSS for enhanced UI aesthetics
-st.markdown("""
+def get_theme_css() -> str:
+    """Return CSS for dark mode without background images."""
+    background_color = "#121212"
+    text_color = "#e0e0e0"  # Softer off-white for dark mode
+    border_color = "#2c3e50"
+    app_background = "rgba(0, 0, 0, 0.9)"
+    sidebar_background = "rgba(0, 0, 0, 0.85)"
+    button_background = "#2c3e50"
+    
+    return f"""
     <style>
-    body {
-        background: url('https://images.pexels.com/photos/450055/pexels-photo-450055.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2') no-repeat center center fixed;
-        background-size: cover;
-        color: #ffffff;
-    }
-    .stApp {
+    body {{
+        background-color: {background_color};
+        color: {text_color};
+    }}
+    .stApp {{
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
         border-radius: 15px;
         padding: 20px;
-        border: 1px solid #2c3e50;
-        background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent black background */
-    }
-    .stSidebar {
+        border: 1px solid {border_color};
+        background-color: {app_background};
+    }}
+    .stSidebar {{
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
         border-radius: 15px;
         padding: 20px;
-        border: 1px solid #2c3e50;
-        background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent black background */
-    }
-    .stButton button {
+        border: 1px solid {border_color};
+        background-color: {sidebar_background};
+    }}
+    .stButton button {{
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
         border-radius: 5px;
-        border: 1px solid #2c3e50;
-        background-color: #2c3e50; /* New button background color */
-        color: #ffffff; /* Button text color */
-    }
-    .stHeader {
+        border: 1px solid {border_color};
+        background-color: {button_background};
+        color: {text_color};
+    }}
+    .stHeader {{
         text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-    }
+    }}
     </style>
-""", unsafe_allow_html=True)
+    """
 
 @dataclass
 class AppState:
     research_in_progress: bool = False
     show_settings: bool = False
     stop_requested: bool = False
-    research_completed: bool = False  # Added for clear functionality
+    research_completed: bool = False
 
 def init_session_state():
-    """Initialize session state variables"""
+    """Initialize session state variables."""
     if 'state' not in st.session_state:
         st.session_state.state = AppState()
 
 def load_settings() -> Dict[str, str]:
-    """Load settings from .env file"""
+    """Load settings from .env file."""
     load_dotenv()
     return {key: os.getenv(key, default) for key, default in ENV_KEYS.items()}
 
 def save_settings(settings: Dict[str, str]):
-    """Save settings to .env file"""
+    """Save settings to .env file."""
     env_path = os.path.join(os.path.dirname(__file__), '.env')
     for key, value in settings.items():
         set_key(env_path, key, value)
 
 def render_header():
-    """Render application header"""
+    """Render application header."""
     st.title("RelearnWeb")
     st.write("Research and Learn the Web like a Pro. An FOSS Alternative to OpenAI's DeepResearch.")
     st.write("A Joint Effort by Quadropic OSS and Open Source Contributers")
     st.markdown("[Learn more about Quadropic](https://quadropic.com)")
 
 def render_sidebar() -> Dict[str, Any]:
-    """Render sidebar and return research parameters"""
+    """Render sidebar and return research parameters."""
     st.sidebar.header("Research Parameters")
     params = {
         "query": st.sidebar.text_input("Research Query", "Quantum Computing breakthroughs"),
@@ -111,7 +116,7 @@ def render_sidebar() -> Dict[str, Any]:
     return params
 
 def render_settings():
-    """Render settings form"""
+    """Render settings form."""
     with st.form("settings_form"):
         st.subheader("AI Settings Configuration")
         current_settings = load_settings()
@@ -122,19 +127,20 @@ def render_settings():
                 type="password" if "API_KEY" in key else "default"
             ) for key in ENV_KEYS
         }
+        save_clicked = st.form_submit_button("Save Settings")
+        cancel_clicked = st.form_submit_button("Cancel")
         
-        if st.form_submit_button("Save Settings"):
+        if save_clicked:
             save_settings(new_settings)
             st.success("Settings saved successfully!")
             st.session_state.state.show_settings = False
-            st.rerun()
-        
-        if st.form_submit_button("Cancel"):
+            st.experimental_rerun()
+        elif cancel_clicked:
             st.session_state.state.show_settings = False
-            st.rerun()
+            st.experimental_rerun()
 
 def run_research(params: Dict[str, Any]):
-    """Execute research pipeline"""
+    """Execute research pipeline."""
     initial_state = ResearchAgentState(
         depth=params["depth"],
         breadth=params["breadth"],
@@ -165,39 +171,44 @@ def run_research(params: Dict[str, Any]):
         for tab, key in zip(tabs, ["query", "directions", "learnings", "report"]):
             if event_data[key] != prev_state[key]:
                 tab.markdown(f"**{key.title()}:**\n\n{event_data[key]}")
+                if event_data[key].startswith("```"):
+                    event_data[key] = event_data[key].strip("```")
                 prev_state[key] = event_data[key]
         
-        time.sleep(0.1)
+    
+    # After research completes, store the final report for export.
+    st.session_state["research_report"] = prev_state["report"]
 
 def main():
     init_session_state()
+    
+    # Always apply dark mode theme
+    st.markdown(get_theme_css(), unsafe_allow_html=True)
+    
     render_header()
     params = render_sidebar()
     
-    # Modified column layout for buttons
-    col1, col2, col3 = st.sidebar.columns(3)
+    # Vertical Button Layout in Sidebar
+    if st.session_state.state.research_in_progress:
+        if st.sidebar.button("🛑 Stop Research"):
+            st.session_state.state.stop_requested = True
+            st.session_state.state.research_in_progress = False
+    else:
+        if st.sidebar.button("🚀 Start Research"):
+            st.session_state.state.research_in_progress = True
+            st.session_state.state.show_settings = False
     
-    with col1:
-        if not st.session_state.state.research_in_progress:
-            if st.button("⚙️ Configure AI Settings"):
-                st.session_state.state.show_settings = True
-    
-    with col2:
-        if st.session_state.state.research_completed:
-            if st.button("🔄 Clear"):
-                st.session_state.state.research_completed = False
-                st.session_state.state.research_in_progress = False
-                st.experimental_rerun()
-        else:
-            if st.button("🚀 Start", disabled=st.session_state.state.research_in_progress):
-                st.session_state.state.research_in_progress = True
-                st.session_state.state.show_settings = False
-    
-    with col3:
-        if st.session_state.state.research_in_progress:
-            if st.button("🛑 Stop"):
-                st.session_state.state.stop_requested = True
-                st.session_state.state.research_in_progress = False
+    if st.sidebar.button("⚙️ AI Settings"):
+        st.session_state.state.show_settings = True
+
+    # Show Export Research button if research is completed and report exists.
+    if st.session_state.state.research_completed and "research_report" in st.session_state:
+        st.sidebar.download_button(
+            label="Export Research",
+            data=st.session_state["research_report"],
+            file_name="research_report.md",
+            mime="text/markdown"
+        )
     
     if st.session_state.state.show_settings and not st.session_state.state.research_in_progress:
         render_settings()
