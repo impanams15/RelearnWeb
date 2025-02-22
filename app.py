@@ -1,10 +1,8 @@
 """
 Quadropic OSS
 https://oss.quadropic.com
-Author: [Mohamed Kamran , ]
-Date: Feb 21st 2025
-
-This file contains the implementation of the Firecrawl search functionality.
+Author: [MohamedKamran , hemanthcs34, impanams15]
+Date: Feb 22nd 2025
 """
 
 
