@@ -12,6 +12,7 @@ from langgraph.graph import StateGraph, START, END
 from utils.llm import generate_llm_response
 from utils.firecrawler import crawl_firechain
 from datetime import datetime
+from prompts.system_prompt import systems as system_prompt
 
 # -------------------------------
 # Define the Research Agent State
@@ -44,7 +45,7 @@ def learner_node(state: ResearchAgentState) -> ResearchAgentState:
         f"Previous Learnings and Directions:\n{state['learnings']}\n{state['directions']}"
         f"Today's Date: {cdate}"
     ))
-    response = generate_llm_response(system_prompt=prompt, user_prompt = prompt, streaming=False)
+    response = generate_llm_response(system_prompt=system_prompt, user_prompt = prompt, streaming=False)
     outline = response
     state["results"] = f"Initial Outline:\n{outline}"
     return state
@@ -54,7 +55,7 @@ def serp_queries(state: ResearchAgentState) -> ResearchAgentState:
     numqueries = 1
     res_format = "You have to return in XML format example : <query>Quantum Computing breakthroughs</query>"
     prompt = f"User Prompt : {state['results']}\n---------\nGiven the following prompt from the user, generate a list of SERP queries to research the topic. Return a maximum of ${numqueries} queries, but feel free to return less if the original prompt is clear.\n{res_format}\nMake sure each query is unique and not similar to each other:"
-    res = generate_llm_response(system_prompt=prompt,user_prompt=prompt)
+    res = generate_llm_response(system_prompt=system_prompt,user_prompt=prompt)
     state["query"] = res.split("<query>")[1].split("</query>")[0]
     return state
 
@@ -63,7 +64,7 @@ def process_results(state: ResearchAgentState) -> ResearchAgentState:
     search_results = crawl_firechain(state["query"])
     state["results"] = search_results
     prompt = "".join(("Summarize the following research findings in bullet points. ", "Highlight key learnings and potential directions.\n\n", f"{state['results']}"))
-    summary = generate_llm_response(system_prompt=prompt, user_prompt=prompt)
+    summary = generate_llm_response(system_prompt=system_prompt, user_prompt=prompt)
     state["learnings"] = summary
     return state
 
@@ -72,7 +73,7 @@ def compile_results(state: ResearchAgentState) -> ResearchAgentState:
     prompt = (
         f"Based on these learnings:\n{state['learnings']}\nList 3 next directions or deeper questions to explore."
     )
-    response = generate_llm_response(system_prompt=prompt, user_prompt=prompt)
+    response = generate_llm_response(system_prompt=system_prompt, user_prompt=prompt)
     state["directions"] = response
     return state
 
@@ -92,7 +93,7 @@ def next_direction(state: ResearchAgentState) -> ResearchAgentState:
 def markdown_report(state: ResearchAgentState) -> ResearchAgentState:
     md_report = ''.join(('-Final Report\n\n', f"- Query\n{state['query']}\n\n", f"- Key Learnings\n{state['learnings']}\n\n"))
     report_prompt = ''.join(("Generate a markdown report based on the research findings. ", "Include the query, key learnings, and potential solutions you have found.", f"{md_report}"))
-    md_report_llm = generate_llm_response(system_prompt=report_prompt, user_prompt=report_prompt)
+    md_report_llm = generate_llm_response(system_prompt=system_prompt, user_prompt=report_prompt)
     state["report"] = md_report_llm
     return state
 

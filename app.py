@@ -170,14 +170,25 @@ def run_research(params: Dict[str, Any]):
         event_data = event[next(iter(event))]
         for tab, key in zip(tabs, ["query", "directions", "learnings", "report"]):
             if event_data[key] != prev_state[key]:
-                tab.markdown(f"**{key.title()}:**\n\n{event_data[key]}")
                 if event_data[key].startswith("```"):
-                    event_data[key] = event_data[key].strip("```")
+                    event_data[key] = event_data[key].strip("\n ```")
+                tab.markdown(f"**{key.title()}:**\n\n{event_data[key]}")
                 prev_state[key] = event_data[key]
-        
     
     # After research completes, store the final report for export.
     st.session_state["research_report"] = prev_state["report"]
+    st.session_state.state.research_completed = True
+    
+    # Show success message
+    st.success("Research completed successfully! You can now export your research report.")
+    
+    # Force sidebar to update by creating a download button here as well
+    st.sidebar.download_button(
+        label="Export Research",
+        data=st.session_state["research_report"],
+        file_name="research_report.md",
+        mime="text/markdown"
+    )
 
 def main():
     init_session_state()
@@ -196,20 +207,24 @@ def main():
     else:
         if st.sidebar.button("🚀 Start Research"):
             st.session_state.state.research_in_progress = True
-            st.session_state.state.show_settings = False
     
-    if st.sidebar.button("⚙️ AI Settings"):
-        st.session_state.state.show_settings = True
+    # Only show AI Settings button when research is not in progress
+    if not st.session_state.state.research_in_progress:
+        if st.sidebar.button("⚙️ AI Settings"):
+            st.session_state.state.show_settings = True
 
-    # Show Export Research button if research is completed and report exists.
+    # Show Export Research button if research is completed and report exists,
+    # without affecting the ongoing research
     if st.session_state.state.research_completed and "research_report" in st.session_state:
         st.sidebar.download_button(
             label="Export Research",
             data=st.session_state["research_report"],
             file_name="research_report.md",
-            mime="text/markdown"
+            mime="text/markdown",
+            help="Download your research report without interrupting the current task"
         )
     
+    # Only show settings when research is not in progress
     if st.session_state.state.show_settings and not st.session_state.state.research_in_progress:
         render_settings()
     
