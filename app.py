@@ -35,7 +35,42 @@ st.set_page_config(
         A Joint Effort by Quadropic OSS and Open Source Contributers.""",
         "Get Help": "mailto:oss@quadropic.com",
     }
-    )
+)
+
+# Added custom CSS for enhanced UI aesthetics
+st.markdown("""
+    <style>
+    body {
+        background: url('https://as1.ftcdn.net/v2/jpg/05/32/80/86/1000_F_532808677_TWEq8CNGqcHmEGDOsda6o5Wi0jiDVj1p.jpg') no-repeat center center fixed;
+        background-size: cover;
+        color: #ffffff;
+    }
+    .stApp {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        border-radius: 15px;
+        padding: 20px;
+        border: 1px solid #2c3e50;
+        background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent black background */
+    }
+    .stSidebar {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        border-radius: 15px;
+        padding: 20px;
+        border: 1px solid #2c3e50;
+        background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent black background */
+    }
+    .stButton button {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        border-radius: 5px;
+        border: 1px solid #2c3e50;
+        background-color: #2c3e50; /* New button background color */
+        color: #ffffff; /* Button text color */
+    }
+    .stHeader {
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
+    </style>
+""", unsafe_allow_html=True)
 
 @dataclass
 class AppState:
