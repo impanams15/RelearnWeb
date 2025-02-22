@@ -28,7 +28,7 @@ st.set_page_config(
     layout="centered",
     menu_items={
         "About": """This is a research and learning tool for the web.
-A Joint Effort by Quadropic OSS and Open Source Contributers.""",
+A Joint Effort by Quadropic OSS and Open Source Contributors.""",
         "Get Help": "mailto:oss@quadropic.com",
     }
 )
@@ -94,7 +94,8 @@ def load_settings() -> Dict[str, str]:
 
 def save_settings(settings: Dict[str, str]):
     """Save settings to .env file."""
-    env_path = os.path.join(os.path.dirname(__file__), '.env')
+    # Use the current working directory to locate the .env file.
+    env_path = os.path.join(os.getcwd(), '.env')
     for key, value in settings.items():
         set_key(env_path, key, value)
 
@@ -102,7 +103,7 @@ def render_header():
     """Render application header."""
     st.title("RelearnWeb")
     st.write("Research and Learn the Web like a Pro. An FOSS Alternative to OpenAI's DeepResearch.")
-    st.write("A Joint Effort by Quadropic OSS and Open Source Contributers")
+    st.write("A Joint Effort by Quadropic OSS and Open Source Contributors")
     st.markdown("[Learn more about Quadropic](https://quadropic.com)")
 
 def render_sidebar() -> Dict[str, Any]:
@@ -120,24 +121,23 @@ def render_settings():
     with st.form("settings_form"):
         st.subheader("AI Settings Configuration")
         current_settings = load_settings()
-        new_settings = {
-            key: st.text_input(
-                key.replace("_", " ").title(), 
-                value=current_settings[key],
-                type="password" if "API_KEY" in key else "default"
-            ) for key in ENV_KEYS
-        }
-        save_clicked = st.form_submit_button("Save Settings")
-        cancel_clicked = st.form_submit_button("Cancel")
+        new_settings = {}
+        for key in ENV_KEYS:
+            if "API_KEY" in key:
+                new_settings[key] = st.text_input(key.replace("_", " ").title(), value=current_settings.get(key, ""), type="password")
+            else:
+                new_settings[key] = st.text_input(key.replace("_", " ").title(), value=current_settings.get(key, ""))
+        col1, col2 = st.columns(2)
+        save_clicked = col1.form_submit_button("Save Settings")
+        cancel_clicked = col2.form_submit_button("Cancel")
         
         if save_clicked:
             save_settings(new_settings)
             st.success("Settings saved successfully!")
             st.session_state.state.show_settings = False
-            st.experimental_rerun()
+            st.rerun()
         elif cancel_clicked:
             st.session_state.state.show_settings = False
-            st.experimental_rerun()
 
 def run_research(params: Dict[str, Any]):
     """Execute research pipeline."""
@@ -160,30 +160,33 @@ def run_research(params: Dict[str, Any]):
     
     for event_counter, event in enumerate(graph.compile().stream(initial_state), 1):
         if st.session_state.state.stop_requested:
-            st.warning("Research Stopped by User")
+            st.warning("Research stopped by user.")
             return
             
         progress = min(int(event_counter / total_steps * 100), 100)
         progress_bar.progress(progress)
         progress_text.text(f"Task {event_counter} of {total_steps} completed.")
         
-        event_data = event[next(iter(event))]
+        # Extract the first key's value from the event dictionary
+        event_key = next(iter(event))
+        event_data = event[event_key]
+        
         for tab, key in zip(tabs, ["query", "directions", "learnings", "report"]):
-            if event_data[key] != prev_state[key]:
-                if event_data[key].startswith("```"):
-                    event_data[key] = event_data[key].strip("\n ```")
-                tab.markdown(f"**{key.title()}:**\n\n{event_data[key]}")
-                prev_state[key] = event_data[key]
+            if event_data.get(key, "") != prev_state.get(key, ""):
+                content = event_data.get(key, "")
+                if content.startswith("```"):
+                    content = content.strip("\n ```")
+                tab.markdown(f"**{key.title()}:**\n\n{content}")
+                prev_state[key] = content
     
     # After research completes, store the final report for export.
     st.session_state["research_report"] = prev_state["report"]
     st.session_state.state.research_completed = True
     
-    # Show success message
     st.success("Research completed successfully! You can now export your research report.")
     
-    # Force sidebar to update by creating a download button here as well
-    st.sidebar.download_button(
+    # Provide a download button for the research report in the main interface.
+    st.download_button(
         label="Export Research",
         data=st.session_state["research_report"],
         file_name="research_report.md",
@@ -192,42 +195,50 @@ def run_research(params: Dict[str, Any]):
 
 def main():
     init_session_state()
-    
-    # Always apply dark mode theme
     st.markdown(get_theme_css(), unsafe_allow_html=True)
     
     render_header()
     params = render_sidebar()
     
-    # Vertical Button Layout in Sidebar
+    # Disable sidebar inputs during research.
+    if st.session_state.state.research_in_progress:
+        st.sidebar.text_input("Research Query", params["query"], disabled=True)
+        st.sidebar.number_input("Depth", value=params["depth"], disabled=True)
+        st.sidebar.number_input("Breadth", value=params["breadth"], disabled=True)
+    
+    # Sidebar actions.
     if st.session_state.state.research_in_progress:
         if st.sidebar.button("🛑 Stop Research"):
             st.session_state.state.stop_requested = True
             st.session_state.state.research_in_progress = False
     else:
-        if st.sidebar.button("🚀 Start Research"):
-            st.session_state.state.research_in_progress = True
-    
-    # Only show AI Settings button when research is not in progress
-    if not st.session_state.state.research_in_progress:
+        if not st.session_state.state.research_completed:
+            if st.sidebar.button("🚀 Start Research"):
+                st.session_state.state.research_in_progress = True
         if st.sidebar.button("⚙️ AI Settings"):
             st.session_state.state.show_settings = True
 
-    # Show Export Research button if research is completed and report exists,
-    # without affecting the ongoing research
+    # Export and Clear options if research is completed.
     if st.session_state.state.research_completed and "research_report" in st.session_state:
-        st.sidebar.download_button(
-            label="Export Research",
-            data=st.session_state["research_report"],
-            file_name="research_report.md",
-            mime="text/markdown",
-            help="Download your research report without interrupting the current task"
-        )
+        col1, col2 = st.sidebar.columns(2)
+        if col1.button("📥 Export Research"):
+            st.download_button(
+                label="Download Report",
+                data=st.session_state["research_report"],
+                file_name="research_report.md",
+                mime="text/markdown"
+            )
+        if col2.button("🗑️ Clear Research"):
+            st.session_state.state.research_completed = False
+            if "research_report" in st.session_state:
+                del st.session_state["research_report"]
+            st.rerun()
     
-    # Only show settings when research is not in progress
+    # Render settings if requested.
     if st.session_state.state.show_settings and not st.session_state.state.research_in_progress:
         render_settings()
     
+    # Run research if initiated.
     if st.session_state.state.research_in_progress:
         run_research(params)
         st.session_state.state.research_completed = True
