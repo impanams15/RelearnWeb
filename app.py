@@ -41,7 +41,7 @@ st.set_page_config(
 st.markdown("""
     <style>
     body {
-        background: url('https://as1.ftcdn.net/v2/jpg/05/32/80/86/1000_F_532808677_TWEq8CNGqcHmEGDOsda6o5Wi0jiDVj1p.jpg') no-repeat center center fixed;
+        background: url('https://images.pexels.com/photos/450055/pexels-photo-450055.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2') no-repeat center center fixed;
         background-size: cover;
         color: #ffffff;
     }
