@@ -26,6 +26,18 @@ To get started with RelearnWeb, please visit our [GitHub repository](https://git
 
 For Setup Guide please visit [SETUP.md](SETUP.md)
 
+## Shout Out : Free and Open Source LLMs and Firecrawl
+
+Run it Free and Open Source (Guide mentioned in SETUP.md)
+
+1. (Web Search) Firecrawl OSS Self Host [Docs](https://docs.firecrawl.dev/contributing/self-host)
+
+2. Use Free and OSS LLMs like Ollama [Docs](https://ollama.com/)
+
+3. Use LMStudio [Docs](https://lmstudio.ai/)
+
+These Projects have helped us to remain Free and Open Source while integrating few of the Functionalities
+
 ## Contributing
 We welcome contributions! Please see our [contribution guidelines](CONTRIBUTING.md) for details.
 
