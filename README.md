@@ -25,11 +25,7 @@ RelearnWeb aims to empower researchers, students, and lifelong learners by provi
 
 * **Alternative to Proprietary Solutions:** RelearnWeb offers a compelling alternative to proprietary web research platforms like Deepresearch, giving you control over your data and research process.
 
-## Getting Started
-
-To get started with RelearnWeb, please visit our [GitHub repository](https://github.com/QuadropicHQ/RelearnWeb) for installation instructions, documentation, and examples. We encourage you to join our community forum to ask questions, share your experiences, and contribute to the project.
-
-For Setup Guide please visit [SETUP.md](SETUP.md)
+---
 
 ## Shout Out : Free and Open Source LLMs and Firecrawl
 
@@ -40,6 +36,13 @@ Run it Free and Open Source (Guide mentioned in SETUP.md)
 2. Use Free and OSS LLMs like Ollama [Docs](https://ollama.com/)
 
 3. Use LMStudio [Docs](https://lmstudio.ai/)
+---
+
+## Getting Started
+
+To get started with RelearnWeb, please visit our [GitHub repository](https://github.com/QuadropicHQ/RelearnWeb) for installation instructions, documentation, and examples. We encourage you to join our community forum to ask questions, share your experiences, and contribute to the project.
+
+For Setup Guide please visit [SETUP.md](SETUP.md)
 
 These Projects have helped us to remain Free and Open Source while integrating few of the Functionalities
 
