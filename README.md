@@ -6,6 +6,11 @@ A modern open-source learning platform focused on deep research and collaborativ
 
 **RelearnWeb**, is an open-source platform designed to revolutionize web research, learning, and knowledge synthesis.  It serves as a powerful alternative to OpenAI's Deepresearch, offering an enriched environment for exploring, understanding, and interacting with information gathered from the vast expanse of the internet. While Quadropic is the primary driver, RelearnWeb is designed with open collaboration in mind, encouraging community contributions and growth.
 
+## Quick Demo
+[![RelearnWeb Demo](https://img.youtube.com/vi/WlXmoDZ8eMQ/0.jpg)](https://www.youtube.com/watch?v=WlXmoDZ8eMQ)
+
+Watch our quick demo to see RelearnWeb in action!
+
 ## Empowering Researchers and Learners
 
 RelearnWeb aims to empower researchers, students, and lifelong learners by providing the tools they need to efficiently and effectively navigate the complexities of online information. Whether you're conducting in-depth academic research, exploring a new topic, or simply trying to stay up-to-date with the latest developments in your field, RelearnWeb can help you unlock the full potential of the web.
